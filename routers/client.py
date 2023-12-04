@@ -1,3 +1,4 @@
+#client.py
 from sqlalchemy.orm.session import Session
 from schemas.client import ClientBase, ClientDisplay
 from fastapi import APIRouter, Depends
@@ -12,3 +13,4 @@ router = APIRouter(
 @router.post('', response_model=ClientDisplay)
 def create_client(request: ClientBase, db: Session = Depends(get_db)):
   return client_db.create_user(db, request)
+

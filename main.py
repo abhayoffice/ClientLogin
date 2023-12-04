@@ -1,15 +1,31 @@
 from os import name
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordBearer
+
 from db import models
 from db.database import engine
-from routers import client
+from db.hashing import Hash
+from routers import client, signin
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
 
-app.include_router(client.router)
+# # Define OAuth2PasswordBearer instance
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+#
+# # Add security scheme to OpenAPI documentation
+# app.openapi_schema["components"]["securitySchemes"] = {
+#     "bearerAuth": {
+#         "type": "http",
+#         "scheme": "bearer",
+#         "bearerFormat": "JWT",
+#     }
+# }
+
+app.include_router(client.router, dependencies=[Depends(Hash.get_current_client)])
+app.include_router(signin.router)
 
 @app.get("/")
 def root():

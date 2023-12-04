@@ -9,3 +9,11 @@ class DbClient(Base):
   username = Column(String)
   email = Column(String)
   password = Column(String)
+
+class DbPost(Base):
+  __tablename__ = 'post'
+  id = Column(Integer, primary_key=True, index=True)
+  strings = Column(String)
+  timestamp = Column(DateTime)
+  client_id = Column(Integer, ForeignKey('client.id'))
+  # client = relationship('', back_populates='')
