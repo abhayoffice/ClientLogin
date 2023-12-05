@@ -2,6 +2,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 
 SQLALCHEMY_DATABASE_URL = "mssql+pyodbc://localhost\\SQLEXPRESS01/master?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server"
 
@@ -12,7 +13,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-async def get_db():
+@contextmanager
+def get_db():
     db = SessionLocal()
     try:
         yield db

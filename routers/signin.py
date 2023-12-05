@@ -1,6 +1,8 @@
 #signin.py
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm.session import Session
+from typing_extensions import Annotated
+
 from db.client_db import authenticate_client
 from db.hashing import Hash
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,6 +29,7 @@ async def login_for_access_token(db: Session= Depends(get_db), form_data: OAuth2
     print("The access token is", access_token," and the token_type is bearer")
     return {"access_token": access_token, "token_type": "bearer"}
 
-# @router.get("/client/me/", response_model=ClientBase)
+@router.get("/client/me/", response_model=ClientDisplay)
 # async def read_users_me(current_client: ClientBase = Depends(Hash.get_current_active_client)):
-#     return current_client
+async def read_users_me(current_client: Annotated[ClientBase, Depends(Hash.get_current_active_client)]):
+    return current_client

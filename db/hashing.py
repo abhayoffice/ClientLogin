@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from datetime import timedelta, datetime
 from sqlalchemy.orm import Session
+from typing_extensions import Annotated
 
 from db.database import get_db
 from schemas import client_query
@@ -61,7 +62,8 @@ class Hash():
 
         return client
 
-    async def get_current_active_client(current_client: ClientInHash = Depends(get_current_client)):
+    # async def get_current_active_client(current_client: ClientInHash = Depends(get_current_client)):
+    async def get_current_active_client(current_client: Annotated[ClientInHash, Depends(get_current_client)]):
         if current_client.disabled:
             raise HTTPException(status_code=400, detail="Inactive user")
         return current_client
