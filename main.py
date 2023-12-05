@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 
-app = FastAPI()
+app = FastAPI(debug=True)
 
 # # Define OAuth2PasswordBearer instance
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

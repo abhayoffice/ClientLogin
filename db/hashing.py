@@ -25,7 +25,7 @@ class Hash():
         return pwd_cxt.hash(password)
 
     @staticmethod
-    def verify(hashed_password : str, plain_password: str):
+    def verify( plain_password: str, hashed_password : str):
         print("-----------Hashed pw", hashed_password, " and plain pw", plain_password)
         return pwd_cxt.verify(plain_password, hashed_password)
 
