@@ -24,7 +24,7 @@ app = FastAPI()
 #     }
 # }
 
-app.include_router(client.router, dependencies=[Depends(Hash.get_current_client)])
+app.include_router(client.router)
 app.include_router(signin.router)
 
 @app.get("/")

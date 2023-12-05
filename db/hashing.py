@@ -30,8 +30,8 @@ class Hash():
         return pwd_cxt.verify(plain_password, hashed_password)
 
     @staticmethod
-    def create_access_token(data: dict):
-        expires_delta = timedelta(ACCESS_TOKEN_EXPIRE_MINUTES)
+    def create_access_token(data: dict, expires_delta):
+        # expires_delta = timedelta(ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -42,7 +42,8 @@ class Hash():
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
 
-    def get_current_client(db: Session = Depends(get_db()), token: str = Depends(oauth2_scheme)):
+    def get_current_client(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme) ):
+        print("Inside current client.")
         credential_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                              detail="Could not validate credentials",
                                              headers={"WWW-Authenticate": "Bearer"})
@@ -63,9 +64,12 @@ class Hash():
         return client
 
     # async def get_current_active_client(current_client: ClientInHash = Depends(get_current_client)):
-    async def get_current_active_client(current_client: Annotated[ClientInHash, Depends(get_current_client)]):
+    def get_current_active_client(current_client: Annotated[ClientInHash, Depends(get_current_client)]):
+        print("Inside current active client")
         if current_client.disabled:
             raise HTTPException(status_code=400, detail="Inactive user")
-        return current_client
+        # return current_client
+        print(type(current_client),"==========",current_client)
+        return {"Helo":"Hello"}
 
 

@@ -1,5 +1,7 @@
 # client_db.py
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+
+from db.database import get_db
 from db.models import DbClient
 from schemas.client import ClientBase
 from sqlalchemy.orm.session import Session
@@ -18,7 +20,7 @@ def create_user(db: Session, request: ClientBase, new_client=None):
     db.refresh(new_client)
     return new_client
 
-def authenticate_client(db: Session, username: str, password):
+def authenticate_client(username: str, password:str, db: Session = Depends(get_db)):
     client = client_query.get_client_by_username(db, username)
     if not client:
         return False
