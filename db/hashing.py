@@ -50,6 +50,7 @@ class Hash():
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
+            print("The username is ==========",username)
             if username is None:
                 raise credential_exception
 
@@ -66,10 +67,11 @@ class Hash():
     # async def get_current_active_client(current_client: ClientInHash = Depends(get_current_client)):
     def get_current_active_client(current_client: Annotated[ClientInHash, Depends(get_current_client)]):
         print("Inside current active client")
+        print("===============",type(current_client), current_client.username)
         if current_client.disabled:
             raise HTTPException(status_code=400, detail="Inactive user")
         # return current_client
         print(type(current_client),"==========",current_client)
-        return {"Helo":"Hello"}
+        return {"Helo":"Hello", "bye":"bye bye "}
 
 

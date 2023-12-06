@@ -1,3 +1,4 @@
+#schemas/client.py
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
@@ -33,3 +34,8 @@ class ClientPostDisplay(BaseModel):
     client: Client
     class Config():
         orm_mode = True
+
+
+class ResetPassword:
+    username: str
+    new_pass : str

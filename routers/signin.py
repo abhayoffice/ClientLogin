@@ -12,8 +12,8 @@ from schemas.token import Token
 
 
 router = APIRouter(
-  prefix='/login',
-  tags=['login']
+  prefix='/auth',
+  tags=['auth']
 )
 
 
@@ -30,9 +30,8 @@ async def login_for_access_token(db: Session= Depends(get_db), form_data: OAuth2
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/client/me/"
-    # , response_model=ClientDisplay
-    , response_model=None
+    , response_model=ClientDisplay
+    # , response_model=None
             )
-# async def read_users_me(current_client: ClientBase = Depends(Hash.get_current_active_client)):
-async def read_users_me( current_client: Annotated[ClientDisplay, Depends(Hash.get_current_active_client)]):
+async def read_users_me(current_client: Annotated[ClientDisplay, Depends(Hash.get_current_active_client)]):
     return current_client

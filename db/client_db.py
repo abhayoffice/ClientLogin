@@ -1,6 +1,5 @@
 # client_db.py
 from fastapi import HTTPException, status, Depends
-
 from db.database import get_db
 from db.models import DbClient
 from schemas.client import ClientBase
@@ -20,10 +19,13 @@ def create_user(db: Session, request: ClientBase, new_client=None):
     db.refresh(new_client)
     return new_client
 
-def authenticate_client(username: str, password:str, db: Session = Depends(get_db)):
+def authenticate_client(username: str, password:str, db: Session):
     client = client_query.get_client_by_username(db, username)
     if not client:
         return False
     if not Hash.verify(password, client.password):
         return False
     return client
+
+def create_password_reset_token(db: Session, email):
+    return None
