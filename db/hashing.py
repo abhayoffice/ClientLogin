@@ -1,23 +1,22 @@
 # hashing.py
-from fastapi import Depends, HTTPException, status
+from typing import Union, Any
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt
 from datetime import timedelta, datetime
-from sqlalchemy.orm import Session
-from typing_extensions import Annotated
 
-from db.database import get_db
-from schemas import client_query
-from schemas.client import ClientInHash
-from schemas.token import TokenData
+from logger import logging
+
 
 pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "ae924eddd6d706c177c3e485c3b38e42eff4631f528b398ca69a37ad0e8fad91"
+SECRET_KEY = "83daa0256a2289b0fb23693bf1f6034d44396675749244721a2b20e896e11662"
+JWT_REFRESH_SECRET_KEY = "88e28b4f939861b6bddf2335bf30c337ce512a25d60361a9a6d88b69f3068d10"
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 class Hash():
     @staticmethod
@@ -25,13 +24,12 @@ class Hash():
         return pwd_cxt.hash(password)
 
     @staticmethod
-    def verify( plain_password: str, hashed_password : str):
-        print("-----------Hashed pw", hashed_password, " and plain pw", plain_password)
+    def verify(plain_password: str, hashed_password: str):
+        logging.debug("Verifying password.")
         return pwd_cxt.verify(plain_password, hashed_password)
 
     @staticmethod
     def create_access_token(data: dict, expires_delta):
-        # expires_delta = timedelta(ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -42,36 +40,44 @@ class Hash():
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
 
-    def get_current_client(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme) ):
-        print("Inside current client.")
-        credential_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                             detail="Could not validate credentials",
-                                             headers={"WWW-Authenticate": "Bearer"})
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            username: str = payload.get("sub")
-            print("The username is ==========",username)
-            if username is None:
-                raise credential_exception
+    @staticmethod
+    def create_refresh_token(subject: Union[str, Any], expires_delta) -> str:
+        if expires_delta is not None:
+            expires_delta = datetime.utcnow() + expires_delta
+        else:
+            expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
-            token_data = TokenData(username=username)
-        except JWTError:
-            raise credential_exception
+        to_encode = {"exp": expires_delta, "sub": str(subject)}
+        encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
+        return encoded_jwt
 
-        client = client_query.get_client_by_username(db, username=token_data.username)
-        if client is None:
-            raise credential_exception
-
-        return client
-
-    # async def get_current_active_client(current_client: ClientInHash = Depends(get_current_client)):
-    def get_current_active_client(current_client: Annotated[ClientInHash, Depends(get_current_client)]):
-        print("Inside current active client")
-        print("===============",type(current_client), current_client.username)
-        if current_client.disabled:
-            raise HTTPException(status_code=400, detail="Inactive user")
-        # return current_client
-        print(type(current_client),"==========",current_client)
-        return {"Helo":"Hello", "bye":"bye bye "}
+    # def get_current_client(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)) -> Type[ClientInHash]:
+    #     logging.debug("Getting current client.")
+    #     credential_exception = HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="Could not validate credentials",
+    #         headers={"WWW-Authenticate": "Bearer"}
+    #     )
+    #
+    #     try:
+    #         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    #         username: str = payload.get("sub")
+    #
+    #         if username is None:
+    #             raise credential_exception
+    #
+    #         token_data = TokenData(username=username)
+    #     except JWTError:
+    #         raise credential_exception
+    #
+    #     client = client_db.get_client_by_username(db, username=token_data.username)
+    #     my_client = ClientInHash
+    #     my_client.email = client.email
+    #     my_client.username = client.username
+    #     if client is None:
+    #         raise credential_exception
+    #
+    #     # return client
+    #     return my_client
 
 

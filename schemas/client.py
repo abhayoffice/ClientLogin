@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
+from logger import logging
 
 class ClientBase(BaseModel):
     username: str
@@ -17,7 +18,7 @@ class ClientDisplay(BaseModel):
 
 class ClientPostBase(BaseModel):
     id: int
-    strings : str
+    strings: str
     pass
 
 class Client(BaseModel):
@@ -27,7 +28,6 @@ class ClientInHash(ClientBase):
     password: str
 
 class ClientPostDisplay(BaseModel):
-
     id: int
     strings: str
     timestamp: datetime
@@ -36,6 +36,17 @@ class ClientPostDisplay(BaseModel):
         orm_mode = True
 
 
-class ResetPassword:
+class ResetPassword(BaseModel):
     username: str
-    new_pass : str
+    new_pass: str
+    reset_code: str
+
+class ClientResetPw(BaseModel):
+    # def __init__(self):
+    #     self.email = None
+    id: int
+    username: str
+    email: str
+    # new_pass: str
+    class Config():
+        orm_mode = True
